@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>game ig </title>
+    <style>
+     * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        height: 100%;
+        width: 100%;
+    }
+  
+    body {
+        background-image: linear-gradient(#0a4d7a, #053825);
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: 100%;
+        width: 100%;
+    }
+    
+    #GameCanvas {
+        border: 5px solid black;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate( -50%, -50%);
+        max-width: 100%;
+        max-height: 100%;
+        image-rendering:pixelated;
+    }
+  
+    img {
+        display: none;
+    }
+    </style>
+</head>
+<body>
+    <canvas id="GameCanvas"></canvas>
+    <script type="module">
+        import imagesToLoad from "./imagesToLoad.json" assert {"type": "json"};
+        import Constants from "./utils/Constants.js";
+        import Game from "./Game.js";
+        console.log(Game)
+        /**
+         * @param {string[]} imageSources
+         * @param {number} dely
+         * @returns {Promise<Image[]>}
+         */
+        const getImages = (imageSources, dely) => Promise.all(
+            imageSources.map(
+                /**
+                * 
+                * @param {string} src 
+                * @returns {Promise<Image>}
+                */
+                (src, index) => new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        const image = new Image();
+                        image.onload = () => resolve(image);
+                        image.onerror = (...args) => {
+                            console.log(`failed to load image: ${src}`);
+                            reject(args);
+                        }
+            
+                        image.src = src;
+                    }, dely * index);
+                }))
+        );
+
+        /**
+        * 
+        * @param {Map<string, Map | Image[] | Image>} maps
+        * @param {string[]} keys
+        * @param {Image} value
+        * @param {number} depth
+        * @returns {void}
+        */
+
+        const setMapValues = (maps, keys, value, depth = 0, preMap = null) => {
+            if(depth === keys.length - 1) {
+                // get the name of the image file
+                //wdaw
+                // test if the name of the image file is a number
+                if(/(?<=\/)\d+\.\w+$/g.test(value.src)){
+                    const existingArray = preMap.get(keys[depth - 1]) instanceof Array ? preMap.get(keys[depth - 1]) : [];
+                    if(existingArray.length === 0) { preMap.set(keys[depth - 1], existingArray); }
+                    existingArray.push(value);
+                    // existingArray.sort((a, b) => Number(a.src.match(/(?<=\/)\d+(?=\.\w+$)/g)[0]) - Number(b.src.match(/(?<=\/)\d+(?=\.\w+$)/g)[0]))// = existingArray.sort((a, b) => a.src.localeCompare(b.src))
+                }else{ maps.set(keys[depth], value); }
+                return;
+            }
+
+            const key = keys[depth];
+            if(!maps.has(key)) maps.set(key, new Map()) 
+            const map = maps.get(key);
+            
+            setMapValues(map, keys, value, depth + 1, maps);
+        }
+
+        const sortArraysBySrc = (imageMap) => {
+            imageMap.forEach(value => {
+                if(value instanceof Array)
+                    value.sort((a, b) => Number(a.src.match(/(?<=\/)\d+(?=\.\w+$)/g)[0]) - Number(b.src.match(/(?<=\/)\d+(?=\.\w+$)/g)[0]));
+                else if(value instanceof Map)
+                    sortArraysBySrc(value);
+            });
+        }
+
+        /**
+        * @param {string[]}
+        * @returns {Promise<Map<string, Map<string, Map<string, Map<string, Image> | Image> | Image>>>}
+        */
+        const loadImages = async (imageFileNames, dely=0) => {
+            const images = await getImages(imageFileNames, dely);
+            const root = location.origin + "/" + Constants.imageRootPath;
+
+            // "image.src.slice(Constants.imageRootPath.length).split("/")": remove "assets/"
+            // and split it into an string[] made of folder names and file name 
+            // directorires.length >= 2, when length is 2: ["folderName", "filename.png"]
+            images.forEach( image => setMapValues(imageMap, image.src.slice(root.length).split("/"), image) );
+            sortArraysBySrc(imageMap);
+            console.log(imageMap)
+            return imageMap;
+        }
+
+        // load imaegs
+        const imageMap = new Map();
+        const isImagesLoaded = loadImages(imagesToLoad.images);
+
+        window.addEventListener('load', async function(){
+
+            //initalize context, canvas and canvas dimentions
+            const CANVAS = this.document.getElementById('GameCanvas');
+            const CTX = CANVAS.getContext('2d');
+            CANVAS.height = Constants.World.height;
+            CANVAS.width = Constants.World.width;
+
+            //this is the game loop
+            let lastTime = 0;
+            async function animate(timeStap){
+                const startTime = Date.now();
+                const deltatime = timeStap - lastTime;
+                lastTime = timeStap;
+                CTX.clearRect(0,0, CANVAS.width, CANVAS.height);
+                game.update(deltatime);
+                game.draw(CTX);
+                if( game.getGameIsPaused() ) {
+                    await game.pauseGame();
+                    lastTime = Date.now() - startTime;
+                }
+                if( !game.getIsGameover() ) { requestAnimationFrame(animate); }
+                //else displayGameOverScreen();
+            }
+
+            // start Game
+            const _imageMap = await isImagesLoaded;
+            const game = new Game(_imageMap, CANVAS.width, CANVAS.height);
+            window.game = game;
+            animate(0);
+        });
+    </script>
+</body>
+</html>
