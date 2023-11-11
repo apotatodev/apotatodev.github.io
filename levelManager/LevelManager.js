@@ -125,26 +125,25 @@ export default class LevelManager {
         }
     }
 
-    initializeClasses(){
-        /**@type {typeof Enemy[]} */ const unInitializedClasses = [
-            Mushroom,
-            AngryPig
-        ];
-        const EnemyImages = this.#game.getImages("Enemies");
-        unInitializedClasses.forEach(Class => {
+    // initializeClasses(){
+    //     /**@type {typeof Enemy[]} */ const unInitializedClasses = [
+    //         Mushroom,
+    //         AngryPig
+    //     ];
+    //     const EnemyImages = this.#game.getImages("Enemies");
+    //     unInitializedClasses.forEach(Class => {
 
-            const _images = EnemyImages.get(Class.name);
-            (new Map()).entries
-            const images = new Map([_images.entries().map(entry => {
+    //         const _images = EnemyImages.get(Class.name);
+    //         const images = new Map([_images.entries().map(entry => {
                 
-            })]);
-            Class.initialize(EnemyImages.get(Class.name), )
-        });
-        // EnemyImages.get("Enimies/Mushroom");
+    //         })]);
+    //         Class.initialize(EnemyImages.get(Class.name), )
+    //     });
+    //     // EnemyImages.get("Enimies/Mushroom");
 
-        // Mushroom.initialize(rootPath + rootPath + );
-        // AngryPig.initialize(rootPath + AngryPig.name);
-    }
+    //     // Mushroom.initialize(rootPath + rootPath + );
+    //     // AngryPig.initialize(rootPath + AngryPig.name);
+    // }
 
     // ignore this it needs to be refactored
     /**
@@ -153,11 +152,10 @@ export default class LevelManager {
      * @returns {boolean}
      */
     isCollidingWithTerrain(x, y) {
-        //if there outside of the grid they would have had to collide with a tile to get there
-        const isOnGround = this.isInGrid(x, y);
         
+        const isInGrid = this.isInGrid(x, y);
         const gridX = Math.floor(x / this.#tileSize), gridY = Math.floor(y / this.#tileSize);
-        return !isOnGround || this.#terrainGrid[gridY][gridX] !== Constants.Terrain.airBlock;
+        return isInGrid && this.#terrainGrid[gridY][gridX] !== Constants.Terrain.airBlock;
     }
 
     // ignore this it needs to be refactored
@@ -168,10 +166,7 @@ export default class LevelManager {
      */
     isInGrid(x, y){
         const gridX = Math.floor(x / this.#tileSize), gridY = Math.floor(y / this.#tileSize);
-        return (
-            gridY < this.#terrainGrid.length && gridY !== Constants.Terrain.airBlock &&
-            gridX < this.#terrainGrid[gridY].length && gridX !== Constants.Terrain.airBlock
-        );
+        return gridY < this.#terrainGrid.length && gridX < this.#terrainGrid[gridY].length;
     }
 
     /**

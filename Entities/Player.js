@@ -112,7 +112,11 @@ export default class Player extends Entity {
                 break;
             case "hit":
                 super.applyToVelocityX(this.#hitSpeed * vectorDirection);
-                this.hitbox.setX(this.hitbox.getX() + 30 * vectorDirection);
+                const temp = this.game.getLevelManager().isCollidingWithTerrain(
+                    this.hitbox.getX() + 30 * vectorDirection + (isGoingLeft ? 0 : this.hitbox.getWidth()),
+                    this.hitbox.getY()
+                );
+                this.hitbox.setX(this.hitbox.getX() + (temp ? 5 : 30) * vectorDirection);
                 break;
             case "boost":
                 super.applyToVelocityX(this.#boostSpeed * vectorDirection);
