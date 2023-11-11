@@ -43,34 +43,35 @@
     </style>
 </head>
 <body>
+    <audio src="./assets/"></audio>
     <canvas id="GameCanvas"></canvas>
     <script type="module">
-        import imagesToLoad from "./imagesToLoad.json" assert {"type": "json"};
+        import listOfAssetsToLoad from "./assetsToLoad.json" assert {"type": "json"};
         import Constants from "./utils/Constants.js";
         import Game from "./Game.js";
-        console.log(Game)
+
         /**
-         * @param {string[]} imageSources
+         * @param {string[]} assetsSources
          * @param {number} dely
-         * @returns {Promise<Image[]>}
+         * @param {Image | Audio} assetsType
+         * @returns {Promise<(HTMLImageElement | HTMLAudioElement)[]>}
          */
-        const getImages = (imageSources, dely) => Promise.all(
-            imageSources.map(
+        const getAssets = (assetsSources, assetsType, dely = 0) => Promise.all(
+            assetsSources.map(
                 /**
-                * 
                 * @param {string} src 
-                * @returns {Promise<Image>}
+                * @returns {Promise<Image | Audio>}
                 */
                 (src, index) => new Promise((resolve, reject) => {
                     setTimeout(() => {
-                        const image = new Image();
-                        image.onload = () => resolve(image);
-                        image.onerror = (...args) => {
-                            console.log(`failed to load image: ${src}`);
+                        const asset = new assetsType();
+                        asset.onload = () => resolve(asset);
+                        asset.onerror = (...args) => {
+                            console.log(`failed to load ${assetsType.name}: ${src}`);
                             reject(args);
                         }
             
-                        image.src = src;
+                        asset.src = src;
                     }, dely * index);
                 }))
         );
@@ -79,7 +80,7 @@
         * 
         * @param {Map<string, Map | Image[] | Image>} maps
         * @param {string[]} keys
-        * @param {Image} value
+        * @param {HTMLImageElement} value
         * @param {number} depth
         * @returns {void}
         */
@@ -105,36 +106,48 @@
             setMapValues(map, keys, value, depth + 1, maps);
         }
 
-        const sortArraysBySrc = (imageMap) => {
+        /**
+         * @param {Map<string, Map | Image[] | Image>} imageMap
+         * @returns {void}
+        */
+        const sortArraysBySrcInPlace = (imageMap) => {
             imageMap.forEach(value => {
                 if(value instanceof Array)
                     value.sort((a, b) => Number(a.src.match(/(?<=\/)\d+(?=\.\w+$)/g)[0]) - Number(b.src.match(/(?<=\/)\d+(?=\.\w+$)/g)[0]));
                 else if(value instanceof Map)
-                    sortArraysBySrc(value);
+                    sortArraysBySrcInPlace(value);
             });
         }
 
-        /**
-        * @param {string[]}
-        * @returns {Promise<Map<string, Map<string, Map<string, Map<string, Image> | Image> | Image>>>}
-        */
-        const loadImages = async (imageFileNames, dely=0) => {
-            const images = await getImages(imageFileNames, dely);
-            const root = location.origin + "/" + Constants.imageRootPath;
-
-            // "image.src.slice(Constants.imageRootPath.length).split("/")": remove "assets/"
-            // and split it into an string[] made of folder names and file name 
-            // directorires.length >= 2, when length is 2: ["folderName", "filename.png"]
-            images.forEach( image => setMapValues(imageMap, image.src.slice(root.length).split("/"), image) );
-            sortArraysBySrc(imageMap);
-            console.log(imageMap)
-            return imageMap;
-        }
 
         // load imaegs
-        const imageMap = new Map();
-        const isImagesLoaded = loadImages(imagesToLoad.images);
+        const imagesToLoad = (async function(imageFileNames, dely = 0){
+            const imageMap = new Map();
+            const images = await getAssets(imageFileNames, Image);
+            const root = location.origin + "/" + listOfAssetsToLoad.imageRootPath;
 
+            images.forEach( image => setMapValues(imageMap, image.src.slice(root.length).split("/"), image) );
+            sortArraysBySrcInPlace(imageMap);
+            console.log(imageMap)
+            return imageMap;
+        })(listOfAssetsToLoad.images);
+
+        // load audios
+        const audioToLoad = (async function(audioFileNames){
+            const audios = await getAssets(audioFileNames, Audio);
+            return audios.reduce((audiosMap, audio) => {
+                audiosMap.set(
+                    audio.src.slice(
+                        audio.src.lastIndexOf("/") + 1,
+                        audio.src.lastIndexOf(".")
+                    ),
+                    audio
+                );
+                return audiosMap;
+            }, new Map());
+        })(listOfAssetsToLoad.audios);
+
+        // when the window is loaded
         window.addEventListener('load', async function(){
 
             //initalize context, canvas and canvas dimentions
@@ -152,55 +165,59 @@
                 CTX.clearRect(0,0, CANVAS.width, CANVAS.height);
                 game.update(deltatime);
                 game.draw(CTX);
-                if( game.getGameIsPaused() ) {
+                if(game.getGameIsPaused()) {
                     await game.pauseGame();
                     lastTime = Date.now() - startTime;
                 }
                 if( !game.getIsGameover() ) { requestAnimationFrame(animate); }
-                //else displayGameOverScreen();
+                // else handle game over
             }
 
             // start Game
             let loadingDisplay = 0;
-            isImagesLoaded.then(imageMap => {
+            Promise.all([imagesToLoad, audioToLoad]).then(([imageMap, audioMap]) => {
                 clearInterval(loadingDisplay)
-                const game = new Game(imageMap, CANVAS.width, CANVAS.height);
+                const game = new Game(imageMap, audioMap);
                 window.game = game;
                 animate(0);
             });
-            (function(){
+
+            // loading sceen ig
+            (async function(){
                 let blackScreenThickness = 0;
                 let wordThickness = 0;
                 let restartWordThickness = 0;
                 const blackScreenThicknessAdder = 0.05;
-                loadingDisplay = setInterval(()=>{
-                    //kristen ITC
+                let timesUpdatded = 0;
+                loadingDisplay = setInterval(async ()=>{
+                    timesUpdatded++;
                     CTX.fillStyle = 'rgba(0, 0, 0, ' + blackScreenThickness + ')'
                     CTX.fillRect(0,0,CANVAS.width,CANVAS.height);
                     if(blackScreenThickness >= 1.5){
                         if(wordThickness >= 1.5){
                             if(restartWordThickness >= 1.5 || restartWordThickness < 0) blackScreenThickness = -blackScreenThickness;
                             restartWordThickness += blackScreenThickness
-                            // CTX.fillStyle = 'white';
-                            // CTX.font = 50 + 'px kristen ITC';
-                            // CTX.fillText('Press "R" To Try Again.', CANVAS.width / 2, CANVAS.height / 2 + 70);
                         }
                         else wordThickness += blackScreenThickness;
                         CTX.font = 100 + 'px kristen ITC';
                         CTX.textAlign = 'center';
                         CTX.save();
-                        CTX.fillStyle = 'red';
-                        CTX.fillText('Loading...', CANVAS.width / 2, CANVAS.height / 2);
+                        CTX.fillStyle = 'white';
+                        for(let i = 0; i < 3; i++){
+                            CTX.fillStyle = 'rgba(0, 0, 0, ' + blackScreenThickness + ')'
+                            CTX.fillRect(0,0,CANVAS.width,CANVAS.height);
+                            await new Promise(res => setTimeout(res, 20));
+                            CTX.fillStyle = 'rgba(0, 0, 0, ' + blackScreenThickness + ')'
+                            CTX.fillRect(0,0,CANVAS.width,CANVAS.height);
+                            CTX.fillStyle = 'white';
+                            CTX.fillText('Loading' + ".".repeat(i + 1), CANVAS.width / 2, CANVAS.height / 2);
+                            // setTimeout(() => {
+                            // }, 20);
+                        }
                         CTX.restore();
                     }else blackScreenThickness += blackScreenThicknessAdder;
-                },50);
+                },70);
             })();
-            // setInterval(() => {
-            //     CTX.clearRect(0,0, CANVAS.width, CANVAS.height);
-            //     CTX.fillRect(0,0, CANVAS.width, CANVAS.height);
-
-            // }, 200);
-            // const _imageMap = await isImagesLoaded;
         });
     </script>
 </body>

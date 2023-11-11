@@ -16,20 +16,21 @@ export default class Game {
     #isGameover;
     #timer;
     #score;
+    #audioMap;
     #imageMap;
     #inputs;
     #boxes = new LinkedList(null);
     #enemies = new LinkedList(null);
     #fruits = new LinkedList(null);
     /**
-     * 
      * @param {Map<string, Map<string, Image | Map<string, Image | Map<string, Image>>>>} imageMap 
+     * @param {Map<string, HTMLAudioElement>} audioMap 
     */
-   constructor(imageMap){
+   constructor(imageMap, audioMap){
     // comsole log debugger don't ask why 
     console.a = (...args) => { if (this.getDebug()) console.log(...args); }
        this.#imageMap = imageMap;
-       console.log(imageMap)
+       this.#audioMap = audioMap;
        console.log(this.getImages("Item/Fruit"))
 
         this.#isGameover =  false;
