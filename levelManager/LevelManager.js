@@ -2,8 +2,7 @@ import level1Data from "../level-data/level-editor-data/level1.json" assert {"ty
 import Game from "../Game.js";
 import Constants from "../utils/Constants.js";
 import { oneDGridTo2DGrid } from "../utils/Utils.js"
-import Entities from "../Entities/__Entities__.js";
-import Hitbox from "../utils/Htibox.js";
+import Entities from "../Entities/Entities.js";
 import Entity from "../Entities/Entity.js";
 import { Enemy } from "../Entities/Enemies.js";
 import { Fruit } from "../Entities/Fruits.js";
