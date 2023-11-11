@@ -36,8 +36,8 @@ export default class Entity {
     imageIsFlippedVertically = false;
 
     // movement stuff
-    gravity = 0.55 * Constants.World.scaleUpTile;
-    maxFallingSpeed = 8.7 * Constants.World.scaleUpTile;
+    gravity = 0.55 * SCALE_UP;
+    maxFallingSpeed = 8.7 * SCALE_UP;
     isOnGround = false;
     velocityX = 0;
     velocityY = 0;
@@ -102,8 +102,8 @@ export default class Entity {
         //initialize image size
         const   sourceWidth = this.constructor.imageWidth ?? this.image.width,
                 sourceHeight = this.constructor.imageHeight ?? this.image.height,
-                drawWidth = this.width ?? sourceWidth * Constants.World.scaleUpTile,
-                drawHeight = this.height ?? sourceHeight * Constants.World.scaleUpTile;
+                drawWidth = this.width ?? sourceWidth * SCALE_UP,
+                drawHeight = this.height ?? sourceHeight * SCALE_UP;
 
         // handle image flipping
         let scaleX = 1, scaleY = 1, translateX = 1, translateY = 1;

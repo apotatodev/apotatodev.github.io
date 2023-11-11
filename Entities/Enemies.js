@@ -38,12 +38,12 @@ export class Enemy extends Entity {
     }
 
     //
-    static #maxFallingSpeed = 8.7 * Constants.World.scaleUpTile;
-    static #friction = 0.5 / Constants.World.scaleUpTile
+    static #maxFallingSpeed = 8.7 * SCALE_UP;
+    static #friction = 0.5 / SCALE_UP
     
     //
     #health = 100;
-    maxSpeed = 1 * Constants.World.scaleUpTile;
+    maxSpeed = 1 * SCALE_UP;
     canSeePlayer = false;
     /**
      * @param {Game} game
@@ -135,7 +135,7 @@ export class Mushroom extends Enemy {
         console.log(this.imageMap)
         this.images = this.imageMap.get("Run");
         this.image = this.images[this.currentImageIndex];
-        this.initializeHitbox(x, y, this.image.width * Constants.World.scaleUpTile - 10, this.image.height * Constants.World.scaleUpTile - 23, 6, 23);
+        this.initializeHitbox(x, y, this.image.width * SCALE_UP - 10, this.image.height * SCALE_UP - 23, 6, 23);
         this.lastPos = {x: this.hitbox.getX(), y: this.hitbox.getY()};
         this.lastFrame = this.currentImageIndex;
         this.velocityX = (Math.random() > 0.5) ? (this.maxSpeed) : (-this.maxSpeed);

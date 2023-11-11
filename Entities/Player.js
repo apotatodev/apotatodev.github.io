@@ -10,12 +10,12 @@ export default class Player extends Entity {
     static imageWidth = Constants.Player.imageWidth;
     static imageHeight = Constants.Player.imageHeight;
     #imageMap;
-    #maxJumpHeight = -8.7 * Constants.World.scaleUpTile;
+    #maxJumpHeight = -8.7 * SCALE_UP;
     #normalMaxFallingSpeed = -this.#maxJumpHeight;
     #WALL_JUMP_MaxFallingSpeed = this.#normalMaxFallingSpeed * 0.3;
     maxFallingSpeed = this.#normalMaxFallingSpeed;
-    #friction = 0.5 / Constants.World.scaleUpTile;
-    #maxSpeed = 3.7 * Constants.World.scaleUpTile;
+    #friction = 0.5 / SCALE_UP;
+    #maxSpeed = 3.7 * SCALE_UP;
     #pushSpeed = this.#maxSpeed * 1.7;
     #hitSpeed = this.#maxSpeed / 2;
     #boostSpeed = this.#maxSpeed * 2;
@@ -44,8 +44,8 @@ export default class Player extends Entity {
         super.initializeHitbox(
             x,
             y,
-            Player.imageWidth * Constants.World.scaleUpTile - 22,
-            Player.imageHeight * Constants.World.scaleUpTile - 15,
+            Player.imageWidth * SCALE_UP - 22,
+            Player.imageHeight * SCALE_UP - 15,
             12,
             12
         );
@@ -146,6 +146,10 @@ export default class Player extends Entity {
             case "hit":
                 this.velocityY = 0;
                 super.applyToVelocityY(this.#normalMaxFallingSpeed * vectorDirection * 0.5);
+                break;
+            case "bounce":
+                // this.velocityY = 0;
+                super.applyToVelocityY(this.#normalMaxFallingSpeed * vectorDirection);
                 break;
             // case "boost":
             //     super.applyToVelocityY(this.#boostSpeed * vectorDirection);
@@ -318,6 +322,15 @@ export default class Player extends Entity {
         //     this.velocityX = 0;
         //     // return;
         // }
+
+        // player is bouncing on emey's head.
+        if(this.hitbox.getY() + this.hitbox.getHeight() * 0.75 <= hitbox.getY()){
+            this.velocityY = 0;
+            this.applyToVelocityY("hit");
+            this.#canDoubleJump = true;
+            return;
+        }
+
         if(this.currentState.constructor.name === HIT.name || this.#timers.get("hitCoolDown").isActive()){ return; }
         const isToTheLeftOfEntity = hitbox.getX() > this.hitbox.getX();
         this.imageIsFlippedHorizontally = !isToTheLeftOfEntity;
@@ -357,7 +370,7 @@ export default class Player extends Entity {
             this.velocityX -= (this.#maxSpeed - Math.abs(this.velocityX)) * 0.25;
         }
         if((!keyBoardInputs.right && !keyBoardInputs.left) || this.currentState.constructor.name === HIT.name) {
-            this.velocityX *= this.currentState.constructor.name === HIT.name ? this.#friction * Constants.World.scaleUpTile * 2 : this.#friction;
+            this.velocityX *= this.currentState.constructor.name === HIT.name ? this.#friction * SCALE_UP * 2 : this.#friction;
         }
         
         this.#fallThrowBlocks = keyBoardInputs.down;

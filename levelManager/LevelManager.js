@@ -38,7 +38,7 @@ export default class LevelManager {
     constructor(game, imageMap, currentLevel = 0) {
         this.#game = game;
         this.#terrainImage = Array.from(imageMap.values())[0];
-        this.#tileSizeScale = Constants.World.scaleUpTile;
+        this.#tileSizeScale = SCALE_UP;
         this.loadLevel(currentLevel);
     }
 
@@ -247,16 +247,16 @@ export default class LevelManager {
                 case "Apple":
                     console.log(EntityClass.__proto__ === Fruit);
                     // i probably just the defualt constructor caller for apple xD
-                    entity = new EntityClass(this.#game, entityData.x * Constants.World.scaleUpTile, entityData.y * Constants.World.scaleUpTile - entityData.height);
+                    entity = new EntityClass(this.#game, entityData.x * SCALE_UP, entityData.y * SCALE_UP - entityData.height);
                     break;
                 case "Mushroom":
-                    entity = new EntityClass(this.#game, entityData.x * Constants.World.scaleUpTile, entityData.y * Constants.World.scaleUpTile - entityData.height * Constants.World.scaleUpTile);
+                    entity = new EntityClass(this.#game, entityData.x * SCALE_UP, entityData.y * SCALE_UP - entityData.height * SCALE_UP);
                     break;
             
                 default:
                     //default params
                     // console.log(EntityClass.name, EntityClass.__proto__ instanceof Fruit)
-                    entity = new EntityClass(this.#game, entityData.x * Constants.World.scaleUpTile, entityData.y * Constants.World.scaleUpTile - entityData.height);
+                    entity = new EntityClass(this.#game, entityData.x * SCALE_UP, entityData.y * SCALE_UP - entityData.height);
                     break;
             }
 

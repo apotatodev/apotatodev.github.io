@@ -18,7 +18,7 @@ export default {
         bgTileSize: 64,
     },
     World:{
-        scaleUpTile: 2,
+        scaleUpTileDefault: 2,
         height: 660,
         width: 1152
     },

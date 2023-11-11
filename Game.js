@@ -10,13 +10,13 @@ import { Box } from "./Entities/Boxes.js";
 import UI from "./UI.js";
 
 export default class Game {
-    #currentLevel;
     #UPDATES_PERSECOND;
     #FPS;
     #isGameover;
     #timer;
     #score;
     #audioMap;
+    #currentLevel = parseInt(localStorage.getItem("currentLevel") ?? "0");
     #imageMap;
     #inputs;
     #boxes = new LinkedList(null);
@@ -40,8 +40,8 @@ export default class Game {
 
         this.offsetX = 0;
         this.offsetY = 0;
-        this.scrollAreaWidth = 150 * Constants.World.scaleUpTile;
-        this.scrollAreaHeight = 75 * Constants.World.scaleUpTile;
+        this.scrollAreaWidth = 150 * SCALE_UP;
+        this.scrollAreaHeight = 75 * SCALE_UP;
 
         this.#currentLevel = 0
 

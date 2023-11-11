@@ -47,12 +47,12 @@ export default class UI {
                 image,
                 x - drawOffsetX,
                 y - drawOffsetY,
-                image.width * Constants.World.scaleUpTile * 2,
-                image.height * Constants.World.scaleUpTile * 2
+                image.width * SCALE_UP * 2,
+                image.height * SCALE_UP * 2
             );
 
             //
-            context.fillText(this.fruitCounter.get(image.src), x + image.width + 4 * ((Constants.World.scaleUpTile - 1) * 2), y + image.height * Constants.World.scaleUpTile - 6);
+            context.fillText(this.fruitCounter.get(image.src), x + image.width + 4 * ((SCALE_UP - 1) * 2), y + image.height * SCALE_UP - 6 * SCALE_UP);
             drawOffsetX *= 2;
             drawOffsetY *= 2;
             x += image.width;
