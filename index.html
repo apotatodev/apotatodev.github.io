@@ -161,10 +161,46 @@
             }
 
             // start Game
-            const _imageMap = await isImagesLoaded;
-            const game = new Game(_imageMap, CANVAS.width, CANVAS.height);
-            window.game = game;
-            animate(0);
+            let loadingDisplay = 0;
+            isImagesLoaded.then(imageMap => {
+                clearInterval(loadingDisplay)
+                const game = new Game(imageMap, CANVAS.width, CANVAS.height);
+                window.game = game;
+                animate(0);
+            });
+            (function(){
+                let blackScreenThickness = 0;
+                let wordThickness = 0;
+                let restartWordThickness = 0;
+                const blackScreenThicknessAdder = 0.05;
+                loadingDisplay = setInterval(()=>{
+                    //kristen ITC
+                    CTX.fillStyle = 'rgba(0, 0, 0, ' + blackScreenThickness + ')'
+                    CTX.fillRect(0,0,CANVAS.width,CANVAS.height);
+                    if(blackScreenThickness >= 1.5){
+                        if(wordThickness >= 1.5){
+                            if(restartWordThickness >= 1.5 || restartWordThickness < 0) blackScreenThickness = -blackScreenThickness;
+                            restartWordThickness += blackScreenThickness
+                            // CTX.fillStyle = 'white';
+                            // CTX.font = 50 + 'px kristen ITC';
+                            // CTX.fillText('Press "R" To Try Again.', CANVAS.width / 2, CANVAS.height / 2 + 70);
+                        }
+                        else wordThickness += blackScreenThickness;
+                        CTX.font = 100 + 'px kristen ITC';
+                        CTX.textAlign = 'center';
+                        CTX.save();
+                        CTX.fillStyle = 'red';
+                        CTX.fillText('Loading...', CANVAS.width / 2, CANVAS.height / 2);
+                        CTX.restore();
+                    }else blackScreenThickness += blackScreenThicknessAdder;
+                },50);
+            })();
+            // setInterval(() => {
+            //     CTX.clearRect(0,0, CANVAS.width, CANVAS.height);
+            //     CTX.fillRect(0,0, CANVAS.width, CANVAS.height);
+
+            // }, 200);
+            // const _imageMap = await isImagesLoaded;
         });
     </script>
 </body>

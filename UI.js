@@ -52,7 +52,7 @@ export default class UI {
             );
 
             //
-            context.fillText(this.fruitCounter.get(image.src), x + image.width + 4 * Constants.World.scaleUpTile, y + image.height * Constants.World.scaleUpTile - 6 * Constants.World.scaleUpTile);
+            context.fillText(this.fruitCounter.get(image.src), x + image.width + 4 * ((Constants.World.scaleUpTile - 1) * 2), y + image.height * Constants.World.scaleUpTile - 6);
             drawOffsetX *= 2;
             drawOffsetY *= 2;
             x += image.width;

@@ -105,18 +105,23 @@ export default class Player extends Entity {
      * @returns {void}
      */
     applyToVelocityX(vectorType, isGoingLeft = !this.imageIsFlippedHorizontally){
+        
+        // "vectorDirection" determins if were pushing player left(xoxo -1) or right(xoxox 1).
         const vectorDirection = (isGoingLeft) ? -1 : 1;
+
         switch (vectorType) {
             case "push":
                 super.applyToVelocityX(this.#pushSpeed * vectorDirection);
                 break;
             case "hit":
                 super.applyToVelocityX(this.#hitSpeed * vectorDirection);
-                const temp = this.game.getLevelManager().isCollidingWithTerrain(
+                
+                // make sure when player is hit they don't get pushed outside of the map
+                const willPushOutsideMap = this.game.getLevelManager().isCollidingWithTerrain(
                     this.hitbox.getX() + 30 * vectorDirection + (isGoingLeft ? 0 : this.hitbox.getWidth()),
                     this.hitbox.getY()
                 );
-                this.hitbox.setX(this.hitbox.getX() + (temp ? 5 : 30) * vectorDirection);
+                this.hitbox.setX(this.hitbox.getX() + (willPushOutsideMap ? 5 : 30) * vectorDirection);
                 break;
             case "boost":
                 super.applyToVelocityX(this.#boostSpeed * vectorDirection);
@@ -221,6 +226,12 @@ export default class Player extends Entity {
 
         // if(Constants.Terrain.colliderBlocks.includes(grid[currentBottom + 1]?.[gridCenterX]) && Math.floor(futureBottomPos / tileSize) >= currentBottom + 1){}
         // players feet are touching the ground or a fall throw block and fall throw is not active
+
+        /*
+        const isColliding = this.game.getLevelManager().isCollidingWithTerrain;
+        const temp = isColliding( this.hitbox.getX() + this.velocityX, this.hitbox.getY() );
+        */
+
         if(
             Math.floor(futureBottomPos / tileSize) >= currentBottom + 1 && (
                 blockBelowPlayer === Constants.Terrain.collisionBlock ||
