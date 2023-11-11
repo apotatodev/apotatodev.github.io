@@ -133,12 +133,13 @@ export class Mushroom extends Enemy {
         if(!this.constructor.isInitialized) { this.constructor.initializeImageMap(game); }
         this.imageMap = this.constructor.imageMap;
         console.log(this.imageMap)
-        this.images = this.imageMap.get("Idle");
+        this.images = this.imageMap.get("Run");
         this.image = this.images[this.currentImageIndex];
         this.initializeHitbox(x, y, this.image.width * Constants.World.scaleUpTile - 10, this.image.height * Constants.World.scaleUpTile - 23, 6, 23);
         this.lastPos = {x: this.hitbox.getX(), y: this.hitbox.getY()};
         this.lastFrame = this.currentImageIndex;
         this.velocityX = (Math.random() > 0.5) ? (this.maxSpeed) : (-this.maxSpeed);
+        this.imageIsFlippedHorizontally = this.velocityX > 0;
         this.frameCount = 0;
         this.neededFrames = 0;
         this.justFlipped = false;
