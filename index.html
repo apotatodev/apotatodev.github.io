@@ -9,13 +9,12 @@
 </head>
 <body>
     <script>
-        /** @type {number}*/ var SCALE_UP = parseInt(localStorage.getItem("SCALE_UP"));
-        if(SCALE_UP === null){
-
+        const scaleUpValue = localStorage.getItem("SCALE_UP");
+        if(!scaleUpValue){
             // if not set. set the game scale to a default of 2
             localStorage.setItem("SCALE_UP", "2");
-            SCALE_UP = parseInt(localStorage.getItem("SCALE_UP"));
         }
+        var SCALE_UP = parseInt(scaleUpValue);
     </script>
     <canvas id="GameCanvas"></canvas>
     <script type="module">
