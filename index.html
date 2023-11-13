@@ -9,10 +9,11 @@
 </head>
 <body>
     <script>
-        const scaleUpValue = localStorage.getItem("SCALE_UP");
+        let scaleUpValue = localStorage.getItem("SCALE_UP");
         if(!scaleUpValue){
             // if not set. set the game scale to a default of 2
             localStorage.setItem("SCALE_UP", "2");
+            scaleUpValue = "2";
         }
         var SCALE_UP = parseInt(scaleUpValue);
     </script>
