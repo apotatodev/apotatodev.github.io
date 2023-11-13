@@ -151,6 +151,7 @@
             Promise.all([imagesToLoad, audioToLoad]).then(([imageMap, audioMap]) => {
                 clearInterval(loadingDisplay)
                 const game = new Game(imageMap, audioMap);
+                console.log(game);
                 window.game = game;
                 animate(0);
             });
