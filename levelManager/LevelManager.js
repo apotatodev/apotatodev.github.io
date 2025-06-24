@@ -1,4 +1,4 @@
-import level1Data from "../level-data/level-editor-data/level1.json" assert {"type": "json"};
+import level1Data from "../level-data/level-editor-data/level1.json" with {"type": "json"};
 import Game from "../Game.js";
 import Constants from "../utils/Constants.js";
 import { oneDGridTo2DGrid } from "../utils/Utils.js"
